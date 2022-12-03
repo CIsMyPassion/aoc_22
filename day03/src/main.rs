@@ -1,7 +1,8 @@
-use std::{path::Path, fs};
+use std::{path::Path, fs, collections::HashSet};
 
 fn main() {
     part_one();
+    part_two();
 }
 
 fn read_input() -> Vec<Rucksack> {
@@ -42,9 +43,35 @@ fn part_one() {
         total_priority += r.find_matching_item().prioraty();
     });
 
-    println!("Rucksack: {:?}", rucksacks[0]);
-
     println!("Total priority: {}", total_priority);
+}
+
+fn part_two() {
+    let rucksacks = read_input();
+    let mut total_priority = 0;
+    rucksacks.chunks(3).map(|slice| {
+        find_group_item(slice)
+    }).for_each(|item| {
+        total_priority += item.prioraty();
+    });
+
+    println!("Total group priority: {}", total_priority);
+}
+
+fn find_group_item(group: &[Rucksack]) -> Item {
+    assert_eq!(group.len(), 3);
+    let mut first_set: HashSet<Item> = HashSet::from_iter(group[0].first_compartment.iter().cloned());
+    first_set.extend::<HashSet<Item>>(HashSet::from_iter(group[0].second_compartment.iter().cloned()));
+    let mut second_set: HashSet<Item> = HashSet::from_iter(group[1].first_compartment.iter().cloned());
+    second_set.extend::<HashSet<Item>>(HashSet::from_iter(group[1].second_compartment.iter().cloned()));
+    let mut third_set: HashSet<Item> = HashSet::from_iter(group[2].first_compartment.iter().cloned());
+    third_set.extend::<HashSet<Item>>(HashSet::from_iter(group[2].second_compartment.iter().cloned()));
+
+    let intersection: HashSet<Item> = first_set.intersection(&second_set).map(|item| *item).collect();
+    let second_intersection: Vec<&Item> = intersection.intersection(&third_set).collect();
+
+    assert_eq!(second_intersection.len(), 1);
+    *second_intersection[0]
 }
 
 #[derive(Debug)]
@@ -72,7 +99,7 @@ impl Rucksack {
     }
 }
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 struct Item {
     case: Case,
     letter: Letter,
@@ -95,13 +122,13 @@ impl Item {
     }
 }
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 enum Case {
     Upper,
     Lower
 }
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 enum Letter {
     A =  1,
     B =  2,
