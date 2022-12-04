@@ -2,6 +2,7 @@ use std::{path::Path, fs, str::FromStr, ops::RangeInclusive};
 
 fn main() {
     part_one();
+    part_two();
 }
 
 fn read_input() -> Vec<Team> {
@@ -30,9 +31,18 @@ fn part_one() {
     let teams = read_input();
 
     let mut total_overlaps = 0;
-    teams.iter().for_each(|team| if team.overlaps() { total_overlaps += 1; });
+    teams.iter().for_each(|team| if team.overlaps_complete() { total_overlaps += 1; });
 
-    println!("Total overlaps: {}", total_overlaps);
+    println!("Total complete overlaps: {}", total_overlaps);
+}
+
+fn part_two() {
+    let teams = read_input();
+
+    let mut total_overlaps = 0;
+    teams.iter().for_each(|team| if team.overlaps_partial() { total_overlaps += 1; });
+
+    println!("Total partial overlaps: {}", total_overlaps);
 }
 
 struct Tasks {
@@ -52,10 +62,20 @@ impl Team {
         Self(first, second)
     }
 
-    pub fn overlaps(&self) -> bool {
+    pub fn overlaps_complete(&self) -> bool {
         if self.0.range.contains(&self.1.range.start()) && self.0.range.contains(&self.1.range.end()) {
             true
         } else if self.1.range.contains(&self.0.range.start()) && self.1.range.contains(&self.0.range.end()) {
+            true
+        } else {
+            false
+        }
+    }
+
+    pub fn overlaps_partial(&self) -> bool {
+        if self.0.range.contains(&self.1.range.start()) || self.0.range.contains(&self.1.range.end()) {
+            true
+        } else if self.1.range.contains(&self.0.range.start()) || self.1.range.contains(&self.0.range.end()) {
             true
         } else {
             false
