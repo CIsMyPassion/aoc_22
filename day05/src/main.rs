@@ -2,6 +2,7 @@ use std::{path::Path, fs};
 
 fn main() {
     part_one();
+    part_two();
 }
 
 fn read_input() -> (Ship, Vec<Move>) {
@@ -35,7 +36,14 @@ fn line_to_move(line: &str) -> Move {
 
 fn part_one() {
     let (mut ship, moves) = read_input();
-    moves.iter().for_each(|some_move| ship.apply_move(&some_move));
+    moves.iter().for_each(|some_move| ship.apply_sequential_move(&some_move));
+
+    println!("Tops: {}", ship.get_tops());
+}
+
+fn part_two() {
+    let (mut ship, moves) = read_input();
+    moves.iter().for_each(|some_move| ship.apply_multi_move(&some_move));
 
     println!("Tops: {}", ship.get_tops());
 }
@@ -61,7 +69,13 @@ impl Ship {
         Self { stacks }
     }
 
-    pub fn apply_move(&mut self, some_move: &Move) {
+    pub fn apply_multi_move(&mut self, some_move: &Move) {
+        let mut take_off: Vec<char> = (0..some_move.amount).map(|_| self.stacks[some_move.from - 1].pop().unwrap()).collect();
+        take_off.reverse();
+        self.stacks[some_move.to - 1].append(&mut take_off);
+    }
+
+    pub fn apply_sequential_move(&mut self, some_move: &Move) {
         for _ in 0..some_move.amount {
             self.single_move(some_move.from, some_move.to);
         }
