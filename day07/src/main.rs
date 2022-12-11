@@ -3,6 +3,7 @@ use std::{path::Path, fs, process::exit, collections::HashMap, rc::Rc, cell::Ref
 
 fn main() {
     part_one();
+    part_two();
 }
 
 fn read_input() -> String {
@@ -59,12 +60,28 @@ fn dir_sum_under_limit(root: NodeHandle, limit: usize) -> usize {
     all_dirs(root).map(|d| d.borrow().total_size()).filter(|&s| s <= limit).sum::<usize>()
 }
 
+fn smallest_dir_to_delete(root: NodeHandle, total_size: usize, needed_space: usize) -> usize {
+    let total_used = root.borrow().total_size();
+    let free_space = total_size - total_used;
+    let needed_diff = needed_space - free_space;
+
+    all_dirs(root).map(|d| d.borrow().total_size()).filter(|&s| s >= needed_diff).min().unwrap()
+}
+
 fn part_one() {
     let input_lines = convert_input(&read_input());
     let root = construct_nodes(&input_lines);
     let sum = dir_sum_under_limit(root, 100000);
 
     println!("Sum: {sum}");
+}
+
+fn part_two() {
+    let input_lines = convert_input(&read_input());
+    let root = construct_nodes(&input_lines);
+    let smallest_dir = smallest_dir_to_delete(root, 70000000, 30000000);
+
+    println!("Smallest dir: {smallest_dir}");
 }
 
 fn line_to_input(line: &str) -> InputLine {
@@ -185,5 +202,14 @@ $ ls
         let sum = dir_sum_under_limit(root, 100000);
 
         assert_eq!(sum, 95437);
+    }
+
+    #[test]
+    fn part_two_test() {
+        let input_lines = convert_input(&TEST_INPUT);
+        let root = construct_nodes(&input_lines);
+        let smallest_dir = smallest_dir_to_delete(root, 70000000, 30000000);
+
+        assert_eq!(smallest_dir, 24933642);
     }
 }
