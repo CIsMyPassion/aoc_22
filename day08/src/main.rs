@@ -27,7 +27,7 @@ fn part_one() {
     println!("Visible trees: {visible}");
 }
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 struct Forest {
     grid: Vec<Vec<Tree>>
 }
@@ -49,7 +49,7 @@ impl Forest {
         let mut counter = 0;
         for y in 1..self.grid.len() - 1 {
             for x in 1..self.grid[y].len() - 1 {
-                if self.vertical(y, x) || self.horizontal(y, x) {
+                if self.vertical_visible(y, x) || self.horizontal_visible(y, x) {
                     counter += 1;
                 }
             }
@@ -58,21 +58,14 @@ impl Forest {
         counter
     }
 
-    fn vertical(&self, row: usize, column: usize) -> bool {
+    fn vertical_visible(&self, row: usize, column: usize) -> bool {
+        self.check_above(row, column) || self.check_below(row, column)
+    }
+
+    fn check_above(&self, row: usize, column: usize) -> bool {
         let tree_height = self.grid[row][column].height;
-        dbg!(tree_height);
 
         for y in 0..row {
-            dbg!(y);
-            dbg!(self.grid[y][column].height);
-            if self.grid[y][column].height >= tree_height {
-                return false
-            }
-        }
-
-        for y in row+1..self.grid.len() {
-            dbg!(y);
-            dbg!(self.grid[y][column].height);
             if self.grid[y][column].height >= tree_height {
                 return false
             }
@@ -81,7 +74,23 @@ impl Forest {
         true
     }
 
-    fn horizontal(&self, row: usize, column: usize) -> bool {
+    fn check_below(&self, row: usize, column: usize) -> bool {
+        let tree_height = self.grid[row][column].height;
+
+        for y in row+1..self.grid.len() {
+            if self.grid[y][column].height >= tree_height {
+                return false
+            }
+        }
+
+        true
+    }
+
+    fn horizontal_visible(&self, row: usize, column: usize) -> bool {
+        self.check_left(row, column) || self.check_right(row, column)
+    }
+
+    fn check_left(&self, row: usize, column: usize) -> bool {
         let tree_height = self.grid[row][column].height;
 
         for x in 0..column {
@@ -89,6 +98,12 @@ impl Forest {
                 return false
             }
         }
+
+        true
+    }
+
+    fn check_right(&self, row: usize, column: usize) -> bool {
+        let tree_height = self.grid[row][column].height;
 
         for x in column+1..self.grid[row].len() {
             if self.grid[row][x].height >= tree_height {
@@ -100,6 +115,7 @@ impl Forest {
     }
 }
 
+#[derive(Debug)]
 struct Tree {
     height: u8,
 }
