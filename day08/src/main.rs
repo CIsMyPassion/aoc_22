@@ -2,6 +2,7 @@ use std::{path::Path, fs};
 
 fn main() {
     part_one();
+    part_two();
 }
 
 fn read_input() -> String {
@@ -27,6 +28,14 @@ fn part_one() {
     println!("Visible trees: {visible}");
 }
 
+fn part_two() {
+    let input = read_input();
+    let forest = input_to_forest(&input);
+    let scenic_score = forest.highest_scenic_score();
+
+    println!("Highest scenic score: {scenic_score}");
+}
+
 #[derive(Default, Debug)]
 struct Forest {
     grid: Vec<Vec<Tree>>
@@ -39,6 +48,29 @@ impl Forest {
 
     pub fn calculate_visible(&self) -> usize {
         self.outline() + self.internal()
+    }
+
+    pub fn highest_scenic_score(&self) -> usize {
+        let mut highest_score = 0;
+
+        for y in 1..self.grid.len() - 1 {
+            for x in 1..self.grid[y].len() - 1 {
+                let score = self.calculate_score(y, x);
+
+                if score > highest_score {
+                    highest_score = score;
+                }
+            }
+        }
+
+        highest_score
+    }
+
+    fn calculate_score(&self, row: usize, column: usize) -> usize {
+        self.up_view_distance(row, column)
+            * self.down_view_distance(row, column)
+            * self.left_view_distance(row, column)
+            * self.right_view_distance(row, column)
     }
 
     fn outline(&self) -> usize {
@@ -113,6 +145,54 @@ impl Forest {
 
         true
     }
+
+    fn up_view_distance(&self, row: usize, column: usize) -> usize {
+        let tree_height = self.grid[row][column].height;
+
+        for y in (0..row).rev() {
+            if self.grid[y][column].height >= tree_height {
+                return row - y
+            }
+        }
+
+        row
+    }
+
+    fn down_view_distance(&self, row: usize, column: usize) -> usize {
+        let tree_height = self.grid[row][column].height;
+
+        for y in row+1..self.grid.len() {
+            if self.grid[y][column].height >= tree_height {
+                return y - row
+            }
+        }
+
+        self.grid.len() - row - 1
+    }
+
+    fn left_view_distance(&self, row: usize, column: usize) -> usize {
+        let tree_height = self.grid[row][column].height;
+
+        for x in (0..column).rev() {
+            if self.grid[row][x].height >= tree_height {
+                return column - x
+            }
+        }
+
+        column
+    }
+
+    fn right_view_distance(&self, row: usize, column: usize) -> usize {
+        let tree_height = self.grid[row][column].height;
+
+        for x in column+1..self.grid[row].len() {
+            if self.grid[row][x].height >= tree_height {
+                return x - column
+            }
+        }
+
+        self.grid[row].len() - column - 1
+    }
 }
 
 #[derive(Debug)]
@@ -143,5 +223,13 @@ mod tests {
         let visible = forest.calculate_visible();
 
         assert_eq!(visible, 21);
+    }
+
+    #[test]
+    fn part_two_test() {
+        let forest = input_to_forest(&INPUT_TEXT);
+        let scenic_score = forest.highest_scenic_score();
+
+        assert_eq!(scenic_score, 8);
     }
 }
