@@ -2,6 +2,7 @@ use std::{path::Path, fs, collections::HashSet, process::exit};
 
 fn main() {
     part_one();
+    part_two();
 }
 
 fn read_input() -> String {
@@ -30,7 +31,17 @@ fn line_to_move(line: &str) -> Move {
 
 fn part_one() {
     let input = read_input();
-    let mut rope = Rope::new();
+    let mut rope = ShortRope::new();
+    let moves = input_to_moves(&input);
+
+    moves.iter().for_each(|some_move| { rope.apply_move(&some_move); });
+
+    println!("Visited: {}", rope.visited_count());
+}
+
+fn part_two() {
+    let input = read_input();
+    let mut rope = LongRope::new(9);
     let moves = input_to_moves(&input);
 
     moves.iter().for_each(|some_move| { rope.apply_move(&some_move); });
@@ -56,27 +67,20 @@ enum Direction {
     RIGHT,
 }
 
-struct Rope {
+trait Rope {
+    fn apply_move(&mut self, some_move: &Move);
+    fn visited_count(&self) -> usize;
+}
+
+struct ShortRope {
     head: (i64, i64),
     tail: (i64, i64),
     visited: HashSet<(i64, i64)>,
 }
 
-impl Rope {
+impl ShortRope {
     pub fn new() -> Self {
         Self { head: (0, 0), tail: (0, 0), visited: HashSet::from([(0, 0)]) }
-    }
-
-    pub fn apply_move(&mut self, some_move: &Move) {
-        for _ in 0..some_move.steps {
-            match some_move.direction {
-                Direction::UP => self.head.1 += 1,
-                Direction::DOWN => self.head.1 -= 1,
-                Direction::LEFT => self.head.0 -= 1,
-                Direction::RIGHT => self.head.0 += 1,
-            }
-            self.pull_tail();
-        }
     }
 
     fn pull_tail(&mut self) {
@@ -98,6 +102,83 @@ impl Rope {
 
         self.visited.insert(self.tail);
     }
+}
+
+impl Rope for ShortRope {
+    fn apply_move(&mut self, some_move: &Move) {
+        for _ in 0..some_move.steps {
+            match some_move.direction {
+                Direction::UP => self.head.1 += 1,
+                Direction::DOWN => self.head.1 -= 1,
+                Direction::LEFT => self.head.0 -= 1,
+                Direction::RIGHT => self.head.0 += 1,
+            }
+            self.pull_tail();
+        }
+    }
+
+    fn visited_count(&self) -> usize {
+        self.visited.len()
+    }
+}
+
+struct LongRope {
+    head: (i64, i64),
+    tail: Vec<(i64, i64)>,
+    visited: HashSet<(i64, i64)>,
+}
+
+impl LongRope {
+    pub fn new(length: usize) -> Self {
+        Self { head: (0, 0), tail: vec![(0, 0); length], visited: HashSet::from([(0, 0)]) }
+    }
+
+    fn pull_tail(&mut self) {
+        for i in 0..self.tail.len() {
+            self.pull_element(i);
+        }
+
+        self.visited.insert(*self.tail.last().unwrap());
+    }
+
+    fn pull_element(&mut self, n: usize) {
+        let previous_element = if n == 0 {
+            self.head
+        } else {
+            self.tail[n - 1]
+        };
+        let mut current_element = &mut self.tail[n];
+
+        let diff_x = previous_element.0 - current_element.0;
+        let diff_y = previous_element.1 - current_element.1;
+
+        if diff_x.abs() > 1 && diff_y.abs() > 0
+            || diff_x.abs() > 0 && diff_y.abs() > 1 {
+
+            current_element.0 += diff_x.signum();
+            current_element.1 += diff_y.signum();
+        } else {
+            if diff_x.abs() > 1 {
+                current_element.0 += diff_x.signum();
+            } else if diff_y.abs() > 1 {
+                current_element.1 += diff_y.signum();
+            }
+        }
+    }
+}
+
+impl Rope for LongRope {
+    fn apply_move(&mut self, some_move: &Move) {
+        for _ in 0..some_move.steps {
+            match some_move.direction {
+                Direction::UP => self.head.1 += 1,
+                Direction::DOWN => self.head.1 -= 1,
+                Direction::LEFT => self.head.0 -= 1,
+                Direction::RIGHT => self.head.0 += 1,
+            }
+            self.pull_tail();
+        }
+    }
 
     fn visited_count(&self) -> usize {
         self.visited.len()
@@ -108,7 +189,7 @@ impl Rope {
 mod tests {
     use super::*;
 
-    const INPUT_TEXT: &str = r#"R 4
+    const PART_ONE_INPUT: &str = r#"R 4
 U 4
 L 3
 D 1
@@ -118,13 +199,33 @@ L 5
 R 2
 "#;
 
+    const PART_TWO_INPUT: &str = r#"R 5
+U 8
+L 8
+D 3
+R 17
+D 10
+L 25
+U 20
+"#;
+
     #[test]
     fn part_one_test() {
-        let mut rope = Rope::new();
-        let moves = input_to_moves(INPUT_TEXT);
+        let mut rope = ShortRope::new();
+        let moves = input_to_moves(PART_ONE_INPUT);
 
         moves.iter().for_each(|some_move| { rope.apply_move(&some_move); });
 
         assert_eq!(rope.visited_count(), 13);
+    }
+
+    #[test]
+    fn part_two_test() {
+        let mut rope = LongRope::new(9);
+        let moves = input_to_moves(PART_TWO_INPUT);
+
+        moves.iter().for_each(|some_move| { rope.apply_move(&some_move); });
+
+        assert_eq!(rope.visited_count(), 36);
     }
 }
