@@ -39,7 +39,6 @@ fn signal_strength_sum(communicator: &mut Communicator, sum_cycles: &[u64]) -> i
     let mut signal_sum = 0;
 
     loop {
-        dbg!(communicator.cycle);
         if sum_cycles.contains(&communicator.cycle) {
             signal_sum += communicator.signal_strength();
         }
