@@ -1,4 +1,4 @@
-use std::{path::Path, fs, process::exit};
+use std::{path::Path, fs, process::exit, collections::VecDeque};
 
 const CYCLES: [u64; 6] = [20, 60, 100, 140, 180, 220];
 
@@ -11,7 +11,7 @@ fn read_input() -> String {
     fs::read_to_string(path).expect("input file needed")
 }
 
-fn input_to_instructions(input: &str) -> Vec<Instruction> {
+fn input_to_instructions(input: &str) -> VecDeque<Instruction> {
     let lines = input.split("\n").filter(|line| !line.is_empty());
     lines.map(|line| line_to_instruction(line)).collect()
 }
@@ -38,21 +38,21 @@ fn part_one() {
 fn signal_strength_sum(communicator: &mut Communicator, sum_cycles: &[u64]) -> i64 {
     let mut signal_sum = 0;
 
-    while communicator.instruction_counter < communicator.instructions.len() {
-        if sum_cycles.contains(&(communicator.cycle + 1)) {
+    loop {
+        dbg!(communicator.cycle);
+        if sum_cycles.contains(&communicator.cycle) {
             signal_sum += communicator.signal_strength();
-            dbg!(communicator.x);
-            dbg!(communicator.cycle);
-            dbg!(communicator.signal_strength());
-            dbg!(signal_sum);
         }
-        communicator.process_instruction();
+
+        if !communicator.step() {
+            break;
+        }
     }
 
     signal_sum
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 struct Addx {
     v: i64,
 }
@@ -63,53 +63,59 @@ impl Addx {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 enum Instruction {
     Noop,
     Addx(Addx),
 }
 
+impl Instruction {
+    fn cycles(self) -> usize {
+        match self {
+            Self::Noop => 1,
+            Self::Addx(_) => 2,
+        }
+    }
+}
+
 struct Communicator {
     x: i64,
     cycle: u64,
-    instruction_counter: usize,
-    instruction_cycle: usize,
-    instructions: Vec<Instruction>,
+    instructions: VecDeque<Instruction>,
+    current: Option<(Instruction, usize)>,
 }
 
 impl Communicator {
-    pub fn new(instructions: Vec<Instruction>) -> Self {
-        Communicator { x: 1, cycle: 0, instruction_counter: 0, instruction_cycle: 0, instructions }
+    pub fn new(instructions: VecDeque<Instruction>) -> Self {
+        let mut comm = Communicator { x: 1, cycle: 1, instructions, current: None };
+        comm.decode();
+        comm
     }
 
-    pub fn process_instruction(&mut self) {
-        let current_instruction = &self.instructions[self.instruction_counter];
+    fn decode(&mut self) {
+        self.current = self.instructions.pop_front().map(|ins| (ins, ins.cycles()));
+    }
 
-        self.instruction_cycle += 1;
-        dbg!(current_instruction);
+    fn step(&mut self) -> bool {
+        if self.current.is_none() {
+            return false;
+        }
 
-        match current_instruction {
-            Instruction::Noop => {
-                if self.instruction_cycle >= 1 {
-                    self.instruction_cycle = 0;
-                }
-            },
-            Instruction::Addx(addx) => {
-                if self.instruction_cycle >= 2 {
-                    self.instruction_cycle = 0;
-                    self.x += addx.v;
-                }
+        let (ins, cycles_left) = self.current.as_mut().unwrap();
+        *cycles_left -= 1;
+        if *cycles_left == 0 {
+            match ins {
+                Instruction::Noop => {},
+                Instruction::Addx(addx) => self.x += addx.v,
             }
+            self.decode();
         }
-
         self.cycle += 1;
-        if self.instruction_cycle == 0 {
-            self.instruction_counter += 1;
-        }
+        true
     }
 
     pub fn signal_strength(&self) -> i64 {
-        self.x * (self.cycle + 1) as i64
+        self.x * self.cycle as i64
     }
 }
 
