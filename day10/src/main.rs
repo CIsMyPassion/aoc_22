@@ -4,6 +4,7 @@ const CYCLES: [u64; 6] = [20, 60, 100, 140, 180, 220];
 
 fn main() {
     part_one();
+    part_two();
 }
 
 fn read_input() -> String {
@@ -33,6 +34,15 @@ fn part_one() {
     let signal_strength_sum = signal_strength_sum(&mut communicator, &CYCLES);
 
     println!("Signal strength sum: {signal_strength_sum}");
+}
+
+fn part_two() {
+    let input = read_input();
+    let instructions = input_to_instructions(&input);
+    let mut communicator = Communicator::new(instructions);
+    let screen_output = communicator.print_screen();
+
+    println!("Screen output:\n{screen_output}");
 }
 
 fn signal_strength_sum(communicator: &mut Communicator, sum_cycles: &[u64]) -> i64 {
@@ -115,6 +125,38 @@ impl Communicator {
 
     pub fn signal_strength(&self) -> i64 {
         self.x * self.cycle as i64
+    }
+
+    pub fn print_screen(&mut self) -> String {
+        let mut output = "".to_owned();
+
+        loop {
+            let mut pixel = self.get_pixel();
+
+            if self.cycle % 40 == 0 {
+                pixel += "\n";
+            }
+
+            if !self.step() {
+                break;
+            }
+
+            output += &pixel;
+
+        }
+
+        output
+    }
+
+    fn get_pixel(&self) -> String {
+        let x_pos = (self.cycle - 1) % 40;
+        let sprite_pos = self.x-1..=self.x+1;
+
+        if sprite_pos.contains(&(x_pos as i64)) {
+            "#".to_owned()
+        } else {
+            ".".to_owned()
+        }
     }
 }
 
@@ -270,6 +312,14 @@ noop
 noop
 "#;
 
+    const PART_TWO_OUTPUT: &str = r#"##..##..##..##..##..##..##..##..##..##..
+###...###...###...###...###...###...###.
+####....####....####....####....####....
+#####.....#####.....#####.....#####.....
+######......######......######......####
+#######.......#######.......#######.....
+"#;
+
     #[test]
     fn part_one_test() {
         let instructions = input_to_instructions(INPUT_TEXT);
@@ -277,5 +327,14 @@ noop
         let signal_strength_sum = signal_strength_sum(&mut communicator, &CYCLES);
 
         assert_eq!(signal_strength_sum, 13140);
+    }
+
+    #[test]
+    fn part_two_test() {
+        let instructions = input_to_instructions(INPUT_TEXT);
+        let mut communicator = Communicator::new(instructions);
+        let screen_output = communicator.print_screen();
+
+        assert_eq!(&screen_output, PART_TWO_OUTPUT);
     }
 }
