@@ -2,6 +2,7 @@ use std::{path::Path, fs, str::FromStr, collections::VecDeque};
 
 fn main() {
     part_one();
+    part_two();
 }
 
 fn read_input() -> String {
@@ -17,14 +18,22 @@ fn input_to_pack(input: &str) -> Pack {
 fn part_one() {
     let input = read_input();
     let mut pack = input_to_pack(&input);
-    pack_rounds(&mut pack, 20);
+    pack_rounds(&mut pack, 3, 20);
 
     println!("Monkey business: {}", pack.monkey_business());
 }
 
-fn pack_rounds(pack: &mut Pack, rounds: usize) {
+fn part_two() {
+    let input = read_input();
+    let mut pack = input_to_pack(&input);
+    pack_rounds(&mut pack, 1, 10000);
+
+    println!("Monkey business: {}", pack.monkey_business());
+}
+
+fn pack_rounds(pack: &mut Pack, panic_divider: usize, rounds: usize) {
     for _ in 0..rounds {
-        pack.round();
+        pack.round(panic_divider);
     }
 }
 
@@ -41,12 +50,14 @@ impl Pack {
         let mut inspection_counts: Vec<usize> = self.monkeys.iter().map(|monkey| monkey.inspection_counter).collect();
         inspection_counts.sort();
 
-        inspection_counts[inspection_counts.len() - 1] * inspection_counts[inspection_counts.len() - 2]
+        inspection_counts.iter().rev().take(2).product()
     }
 
-    pub fn round(&mut self) {
+    pub fn round(&mut self, panic_divider: usize) {
+        let common_multiplier = self.common_multiple();
+
         for i in 0..self.monkeys.len() {
-            let inspected_list = self.monkeys[i].inspect_items();
+            let inspected_list = self.monkeys[i].inspect_items(panic_divider, common_multiplier);
             self.distribute_items(inspected_list);
         }
     }
@@ -56,6 +67,10 @@ impl Pack {
             let (item, target) = inspected_list.pop_front().unwrap();
             self.monkeys[target].items.push_back(item);
         }
+    }
+
+    fn common_multiple(&self) -> usize {
+        self.monkeys.iter().map(|monkey| monkey.test.divisible_by).product()
     }
 }
 
@@ -67,19 +82,19 @@ struct Monkey {
 }
 
 impl Monkey {
-    pub fn inspect_items(&mut self) -> VecDeque<(usize, usize)> {
+    pub fn inspect_items(&mut self, panic_divider: usize, common_multiple: usize) -> VecDeque<(usize, usize)> {
         let mut inspected_list = VecDeque::new();
 
         while !self.items.is_empty() {
-            inspected_list.push_back(self.inspect_item());
+            inspected_list.push_back(self.inspect_item(panic_divider, common_multiple));
         }
 
         inspected_list
     }
 
-    pub fn inspect_item(&mut self) -> (usize, usize) {
+    pub fn inspect_item(&mut self, panic_divider: usize, common_multiple: usize) -> (usize, usize) {
         let item = self.items.pop_front().unwrap();
-        let new_value = self.operation.apply(item) / 3;
+        let new_value = (self.operation.apply(item) / panic_divider) % common_multiple;
         let target = self.test.evaluate(new_value);
 
         self.inspection_counter += 1;
@@ -218,14 +233,25 @@ Monkey 3:
 "#;
 
     #[test]
-    fn part_one_test() {
-        let mut pack = input_to_pack(INPUT);
+    fn parser_test() {
+        let pack = input_to_pack(INPUT);
         assert_eq!(pack.monkeys.len(), 4);
         assert_eq!(pack.monkeys[0].items, [79, 98]);
         assert_eq!(pack.monkeys[0].operation, Operation::Mult(Number::Num(19)));
         assert_eq!(pack.monkeys[0].test, Test { divisible_by: 23, true_target: 2, false_target: 3 });
+    }
 
-        pack_rounds(&mut pack, 20);
+    #[test]
+    fn part_one_test() {
+        let mut pack = input_to_pack(INPUT);
+        pack_rounds(&mut pack, 3, 20);
         assert_eq!(pack.monkey_business(), 10605);
+    }
+
+    #[test]
+    fn part_two_test() {
+        let mut pack = input_to_pack(INPUT);
+        pack_rounds(&mut pack, 1, 10000);
+        assert_eq!(pack.monkey_business(), 2713310158);
     }
 }
