@@ -16,12 +16,31 @@ fn input_to_pairs_of_lists(input: &str) -> Vec<ListPair> {
 fn part_one() {
     let input = read_input();
     let pairs = input_to_pairs_of_lists(&input);
+    let sum: usize = calculate_correct_order_index_sum(&pairs);
+
+    println!("Index sum: {sum}");
 }
 
-#[derive(Debug)]
+fn calculate_correct_order_index_sum(pairs: &Vec<ListPair>) -> usize {
+    pairs.iter().enumerate().map(|(i, pair)| {
+        if pair.is_correct_order() {
+            Some(i + 1)
+        } else {
+            None
+        }
+    }).flatten().sum()
+}
+
+#[derive(Debug, PartialEq)]
 struct ListPair {
     left: NestedList,
     right: NestedList,
+}
+
+impl ListPair {
+    pub fn is_correct_order(&self) -> bool {
+        self.left < self.right
+    }
 }
 
 impl FromStr for ListPair {
@@ -44,7 +63,7 @@ impl FromStr for ListPair {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 struct NestedList {
     list: Vec<ListItem>,
 }
@@ -55,10 +74,41 @@ impl FromStr for NestedList {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if s.starts_with("[") && s.ends_with("]") {
             let truncated = &s[1..s.len()-1];
-            // TODO: rework this to work with nested lists containing more than one element
-            let elements = truncated.split(",");
 
-            let parsed: Result<Vec<ListItem>, _> = elements.map(|element| element.parse()).collect();
+            if truncated.len() == 0 {
+                return Ok(NestedList { list: Vec::new() })
+            }
+
+            let parts: Vec<&str> = truncated.split(",").collect();
+            let mut combined_elements = Vec::new();
+            let mut nest_start = 0;
+            let mut nest_level: i64 = 0;
+
+
+            for i in 0..parts.len() {
+                let part = parts[i];
+                let new_nest = part.matches("[").count() as i64 - part.matches("]").count() as i64;
+                if nest_level == 0 {
+                    nest_start = i;
+                }
+                nest_level += new_nest;
+                if new_nest > 0 {
+                    if nest_level == 0 {
+                        nest_start = i;
+                    }
+                } else if new_nest < 0 {
+                    if nest_level == 0 {
+                        let combined = parts[nest_start..=i].join(",");
+                        combined_elements.push(combined);
+                    }
+                } else {
+                    if nest_level == 0 {
+                        combined_elements.push(part.to_owned());
+                    }
+                }
+            }
+
+            let parsed: Result<Vec<ListItem>, _> = combined_elements.iter().map(|element| element.parse()).collect();
 
             match parsed {
                 Ok(list) => Ok(NestedList { list }),
@@ -70,7 +120,7 @@ impl FromStr for NestedList {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, Ord)]
 enum ListItem {
     Number(u64),
     NestedList(NestedList),
@@ -81,7 +131,6 @@ impl FromStr for ListItem {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if s.starts_with('[') {
-            dbg!(s);
             match s.parse() {
                 Ok(list) => Ok(ListItem::NestedList(list)),
                 Err(_) => Err(()),
@@ -91,6 +140,25 @@ impl FromStr for ListItem {
                 Ok(num) => Ok(ListItem::Number(num)),
                 Err(_) => Err(()),
             }
+        }
+    }
+}
+
+impl PartialOrd for ListItem {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        match self {
+            ListItem::Number(num) => {
+                match other {
+                    ListItem::Number(other_num) => Some(num.cmp(other_num)),
+                    ListItem::NestedList(other_list) => Some(NestedList { list: Vec::from([ListItem::Number(*num)]) }.cmp(other_list)),
+                }
+            },
+            ListItem::NestedList(list) => {
+                match other {
+                    ListItem::Number(other_num) => Some(list.cmp(&NestedList { list: Vec::from([ListItem::Number(*other_num)]) })),
+                    ListItem::NestedList(other_list) => Some(list.cmp(other_list)),
+                }
+            },
         }
     }
 }
@@ -127,12 +195,67 @@ mod tests {
     #[test]
     fn parse_test() {
         let pairs = input_to_pairs_of_lists(INPUT);
-        dbg!(&pairs);
+        let pair0 = ListPair { left: NestedList { list: Vec::from([ListItem::Number(1), ListItem::Number(1), ListItem::Number(3), ListItem::Number(1), ListItem::Number(1)]) },
+                               right: NestedList { list: Vec::from([ListItem::Number(1), ListItem::Number(1), ListItem::Number(5), ListItem::Number(1), ListItem::Number(1)]) } };
+        let pair1 = ListPair { left: NestedList { list: Vec::from([ListItem::NestedList(NestedList { list: Vec::from([ListItem::Number(1)]) }), ListItem::NestedList(NestedList { list: Vec::from([ListItem::Number(2), ListItem::Number(3), ListItem::Number(4)]) })]) },
+                               right: NestedList { list: Vec::from([ListItem::NestedList(NestedList { list: Vec::from([ListItem::Number(1)]) }), ListItem::Number(4)]) } };
+        let pair2 = ListPair { left: NestedList { list: Vec::from([ListItem::Number(9)]) },
+                               right: NestedList { list: Vec::from([ListItem::NestedList(NestedList { list: Vec::from([ListItem::Number(8), ListItem::Number(7), ListItem::Number(6)]) })]) } };
+        let pair3 = ListPair { left: NestedList { list: Vec::from([ListItem::NestedList(NestedList { list: Vec::from([ListItem::Number(4), ListItem::Number(4)]) }), ListItem::Number(4), ListItem::Number(4)]) },
+                               right: NestedList { list: Vec::from([ListItem::NestedList(NestedList { list: Vec::from([ListItem::Number(4), ListItem::Number(4)]) }), ListItem::Number(4), ListItem::Number(4), ListItem::Number(4)]) } };
+        let pair4 = ListPair { left: NestedList { list: Vec::from([ListItem::Number(7), ListItem::Number(7), ListItem::Number(7), ListItem::Number(7)]) },
+                               right: NestedList { list: Vec::from([ListItem::Number(7), ListItem::Number(7), ListItem::Number(7)]) } };
+        let pair5 = ListPair { left: NestedList { list: Vec::new() },
+                               right: NestedList { list: Vec::from([ListItem::Number(3)]) } };
+        let pair6 = ListPair { left: NestedList { list: Vec::from([ListItem::NestedList(NestedList { list: Vec::from([ListItem::NestedList(NestedList { list: Vec::new() })]) })]) },
+                               right: NestedList { list: Vec::from([ListItem::NestedList(NestedList { list: Vec::new() })]) } };
+        let pair7 = ListPair { left: NestedList {
+            list: Vec::from([ListItem::Number(1), ListItem::NestedList(NestedList {
+                list: Vec::from([ListItem::Number(2), ListItem::NestedList(NestedList {
+                    list: Vec::from([ListItem::Number(3), ListItem::NestedList(NestedList {
+                        list: Vec::from([ListItem::Number(4), ListItem::NestedList(NestedList {
+                            list: Vec::from([ListItem::Number(5), ListItem::Number(6), ListItem::Number(7)])
+                        })])
+                    })])
+                })])
+            }), ListItem::Number(8), ListItem::Number(9)])
+        }, right: NestedList {
+            list: Vec::from([ListItem::Number(1), ListItem::NestedList(NestedList {
+                list: Vec::from([ListItem::Number(2), ListItem::NestedList(NestedList {
+                    list: Vec::from([ListItem::Number(3), ListItem::NestedList(NestedList {
+                        list: Vec::from([ListItem::Number(4), ListItem::NestedList(NestedList {
+                            list: Vec::from([ListItem::Number(5), ListItem::Number(6), ListItem::Number(0)])
+                        })])
+                    })])
+                })])
+            }), ListItem::Number(8), ListItem::Number(9)])
+        } };
+
+        assert_eq!(pairs[0], pair0);
+        assert_eq!(pairs[1], pair1);
+        assert_eq!(pairs[2], pair2);
+        assert_eq!(pairs[3], pair3);
+        assert_eq!(pairs[4], pair4);
+        assert_eq!(pairs[5], pair5);
+        assert_eq!(pairs[6], pair6);
+        assert_eq!(pairs[7], pair7);
+
         assert_eq!(pairs.len(), 8);
     }
 
     #[test]
     fn part_one_test() {
         let pairs = input_to_pairs_of_lists(INPUT);
+
+        assert_eq!(pairs[0].is_correct_order(), true);
+        assert_eq!(pairs[1].is_correct_order(), true);
+        assert_eq!(pairs[2].is_correct_order(), false);
+        assert_eq!(pairs[3].is_correct_order(), true);
+        assert_eq!(pairs[4].is_correct_order(), false);
+        assert_eq!(pairs[5].is_correct_order(), true);
+        assert_eq!(pairs[6].is_correct_order(), false);
+        assert_eq!(pairs[7].is_correct_order(), false);
+
+        assert_eq!(calculate_correct_order_index_sum(&pairs), 13);
     }
 }
