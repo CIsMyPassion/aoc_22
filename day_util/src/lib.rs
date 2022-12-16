@@ -7,7 +7,7 @@ pub fn input_file_path() -> PathBuf {
 }
 
 pub fn read_input_file(path: &PathBuf) -> String {
-    fs::read_to_string(path).unwrap_or(String::from(""))
+    fs::read_to_string(path).expect("Input file expected at \"res/input\"")
 }
 
 pub fn read_input() -> String {
