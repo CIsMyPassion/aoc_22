@@ -120,7 +120,7 @@ impl FromStr for NestedList {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Ord)]
+#[derive(Debug, PartialEq, Eq)]
 enum ListItem {
     Number(u64),
     NestedList(NestedList),
@@ -144,22 +144,20 @@ impl FromStr for ListItem {
     }
 }
 
+impl Ord for ListItem {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        match (self, other) {
+            (Self::NestedList(self_list), Self::NestedList(other_list)) => self_list.cmp(other_list),
+            (Self::NestedList(self_list), Self::Number(other_num)) => self_list.cmp(&NestedList { list: vec![ListItem::Number(*other_num)] }),
+            (Self::Number(self_num), Self::NestedList(other_list)) => NestedList { list: vec![ListItem::Number(*self_num)] }.cmp(other_list),
+            (Self::Number(self_num), Self::Number(other_num)) => self_num.cmp(other_num),
+        }
+    }
+}
+
 impl PartialOrd for ListItem {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        match self {
-            ListItem::Number(num) => {
-                match other {
-                    ListItem::Number(other_num) => Some(num.cmp(other_num)),
-                    ListItem::NestedList(other_list) => Some(NestedList { list: Vec::from([ListItem::Number(*num)]) }.cmp(other_list)),
-                }
-            },
-            ListItem::NestedList(list) => {
-                match other {
-                    ListItem::Number(other_num) => Some(list.cmp(&NestedList { list: Vec::from([ListItem::Number(*other_num)]) })),
-                    ListItem::NestedList(other_list) => Some(list.cmp(other_list)),
-                }
-            },
-        }
+        Some(self.cmp(other))
     }
 }
 
