@@ -2,6 +2,7 @@ use std::{fs, path::Path, str::FromStr};
 
 fn main() {
     part_one();
+    part_two();
 }
 
 fn read_input() -> String {
@@ -21,6 +22,16 @@ fn part_one() {
     println!("Index sum: {sum}");
 }
 
+fn part_two() {
+    let input = read_input();
+    let pairs = input_to_pairs_of_lists(&input);
+    let divider_packets = (NestedList { list: vec![ListItem::NestedList(NestedList { list: vec![ListItem::Number(2)] })]},
+                           NestedList { list: vec![ListItem::NestedList(NestedList { list: vec![ListItem::Number(6)] })]});
+    let decoder_key = calculate_decoder_key(&pairs, &divider_packets);
+
+    println!("Decoder key: {decoder_key}");
+}
+
 fn calculate_correct_order_index_sum(pairs: &Vec<ListPair>) -> usize {
     pairs.iter().enumerate().map(|(i, pair)| {
         if pair.is_correct_order() {
@@ -29,6 +40,24 @@ fn calculate_correct_order_index_sum(pairs: &Vec<ListPair>) -> usize {
             None
         }
     }).flatten().sum()
+}
+
+fn total_packet_list_with_dividers(pairs: &Vec<ListPair>, divider_packets: &(NestedList, NestedList)) -> Vec<NestedList> {
+    let mut packets: Vec<NestedList> = pairs.iter().flat_map(|pair| [pair.left.clone(), pair.right.clone()]).collect();
+    packets.push(divider_packets.0.clone());
+    packets.push(divider_packets.1.clone());
+
+    packets
+}
+
+fn calculate_decoder_key(pairs: &Vec<ListPair>, divider_packets: &(NestedList, NestedList)) -> usize {
+    let mut packets = total_packet_list_with_dividers(&pairs, &divider_packets);
+    packets.sort();
+
+    let first_index = packets.iter().position(|packet| *packet == divider_packets.0).unwrap() + 1;
+    let second_index = packets.iter().position(|packet| *packet == divider_packets.1).unwrap() + 1;
+
+    first_index * second_index
 }
 
 #[derive(Debug, PartialEq)]
@@ -63,7 +92,7 @@ impl FromStr for ListPair {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 struct NestedList {
     list: Vec<ListItem>,
 }
@@ -120,7 +149,7 @@ impl FromStr for NestedList {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 enum ListItem {
     Number(u64),
     NestedList(NestedList),
@@ -255,5 +284,15 @@ mod tests {
         assert_eq!(pairs[7].is_correct_order(), false);
 
         assert_eq!(calculate_correct_order_index_sum(&pairs), 13);
+    }
+
+    #[test]
+    fn part_two_test() {
+        let pairs = input_to_pairs_of_lists(INPUT);
+        let divider_packets = (NestedList { list: vec![ListItem::NestedList(NestedList { list: vec![ListItem::Number(2)] })]},
+                               NestedList { list: vec![ListItem::NestedList(NestedList { list: vec![ListItem::Number(6)] })]});
+        let decoder_key = calculate_decoder_key(&pairs, &divider_packets);
+
+        assert_eq!(decoder_key, 140);
     }
 }
