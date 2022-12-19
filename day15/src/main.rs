@@ -29,7 +29,7 @@ fn collect_covered_spaces_in_line(sensors: &Vec<Sensor>, line: i64) -> usize {
 }
 
 fn part_one() {
-    let input = day_util::read_input();
+    let input = day_util::read_input_safe("day15");
     let sensors = input_to_sensors(&input);
     
     let covered_count = collect_covered_spaces_in_line(&sensors, 2000000);
