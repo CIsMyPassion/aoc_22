@@ -13,9 +13,21 @@ fn input_to_cave(input: &str) -> Cave {
     Cave::new(rock_shape)
 }
 
+fn drop_until_max(cave: &mut Cave) {
+    loop {
+        if !cave.drop_sand(SAND_SPAWN_POINT) {
+            break;
+        }
+    }
+}
+
 fn part_one() {
     let input = day_util::read_input();
-    let cave = input_to_cave(&input);
+    let mut cave = input_to_cave(&input);
+
+    drop_until_max(&mut cave);
+    let sand_count = cave.sand_count();
+    println!("Sand count: {sand_count}");
 }
 
 #[cfg(test)]
@@ -41,10 +53,15 @@ mod tests {
         assert_eq!(cave.left_bound(), 494);
         assert_eq!(cave.right_bound(), 503);
         assert_eq!(cave.lower_bound(), 9);
+        assert_eq!(cave.sand_count(), 0);
+        assert_eq!(cave.rock_count(), 20);
     }
 
     #[test]
     fn part_one_test() {
-        let cave = input_to_cave(TEST_INPUT);
+        let mut cave = input_to_cave(TEST_INPUT);
+
+        drop_until_max(&mut cave);
+        assert_eq!(cave.sand_count(), 24);
     }
 }

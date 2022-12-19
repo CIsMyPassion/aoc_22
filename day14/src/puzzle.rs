@@ -7,19 +7,17 @@ impl Position {
     pub fn line_between(&self, other: &Self) -> Vec<Position> {
         if self.0 == other.0 {
             let range = if self.1 > other.1 {
-                other.1+1..self.1-1
+                other.1..=self.1
             } else {
-                self.1..other.1
+                self.1..=other.1
             };
-            dbg!(&range);
             range.into_iter().map(|num| Position(self.0, num)).collect()
         } else {
             let range = if self.0 > other.0 {
-                other.0+1..self.0-1
+                other.0..=self.0
             } else {
-                self.0..other.0
+                self.0..=other.0
             };
-            dbg!(&range);
             range.into_iter().map(|num| Position(num, self.1)).collect()
         }
     }
@@ -45,10 +43,6 @@ pub struct RockShape {
 }
 
 impl RockShape {
-    pub fn new(line: Vec<Position>) -> Self {
-        RockShape { line }
-    }
-
     pub fn rock_positions(&self) -> Vec<Position> {
 
         if self.line.len() == 1 {
@@ -58,7 +52,6 @@ impl RockShape {
 
             for i in 0..self.line.len() - 1 {
                 let line = self.line[i].line_between(&self.line[i + 1]);
-                dbg!(&line);
                 for element in line {
                     collected_positions.push(element);
                 }
@@ -68,6 +61,12 @@ impl RockShape {
             collected_positions
         }
     }
+
+    #[cfg(test)]
+    pub fn new(line: Vec<Position>) -> Self {
+        RockShape { line }
+    }
+
 }
 
 impl FromStr for RockShape {
@@ -109,20 +108,67 @@ impl Cave {
         let lower_bound = rock_set.iter().map(|pos| pos.1).max().unwrap();
         let width = right_bound - left_bound + 1;
 
-        let area = vec![vec![Filling::Air; width]; lower_bound];
+        let mut area = vec![vec![Filling::Air; lower_bound + 1]; width];
+
+        rock_set.iter().for_each(|pos| {
+            area[pos.0 - left_bound][pos.1] = Filling::Rock;
+        });
 
         Self { left_bound, right_bound, lower_bound, area }
     }
 
+    pub fn drop_sand(&mut self, drop_location: Position) -> bool {
+        let mut sand_position = drop_location;
+        loop {
+            if !self.sand_step(&mut sand_position) {
+                break;
+            }
+        }
+
+        self.is_in_bounds(&sand_position)
+    }
+
+    pub fn sand_count(&self) -> usize {
+        let mut sand_counter = 0;
+
+        self.area.iter().for_each(|line| {
+            sand_counter += line.iter().filter(|&element| *element == Filling::Sand).count();
+        });
+
+        sand_counter
+    }
+
+    #[cfg(test)]
     pub fn left_bound(&self) -> usize {
         self.left_bound
     }
 
+    #[cfg(test)]
     pub fn right_bound(&self) -> usize {
         self.right_bound
     }
 
+    #[cfg(test)]
     pub fn lower_bound(&self) -> usize {
         self.lower_bound
+    }
+
+    #[cfg(test)]
+    pub fn rock_count(&self) -> usize {
+        let mut rock_counter = 0;
+
+        self.area.iter().for_each(|line| {
+            rock_counter += line.iter().filter(|&element| *element == Filling::Rock).count();
+        });
+
+        rock_counter
+    }
+
+    fn sand_step(&mut self, sand_position: &mut Position) -> bool {
+        false
+    }
+
+    fn is_in_bounds(&self, sand_position: &Position) -> bool {
+        false
     }
 }
