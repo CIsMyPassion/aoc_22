@@ -1,5 +1,6 @@
 use crate::puzzle::*;
-use crate::puzzle::cave::*;
+use crate::puzzle::cave::Cave;
+use crate::puzzle::bottomless_cave::BottomlessCave;
 
 mod puzzle;
 
@@ -9,12 +10,12 @@ fn main() {
     part_one();
 }
 
-fn input_to_cave(input: &str) -> Cave {
+fn input_to_bottomless_cave(input: &str) -> BottomlessCave {
     let rock_shape: Vec<RockShape> = input.split("\n").filter(|line| !line.is_empty()).map(|line| line.parse().unwrap()).collect();
-    Cave::new(rock_shape)
+    BottomlessCave::new(rock_shape)
 }
 
-fn drop_until_max(cave: &mut Cave) {
+fn drop_until_max(cave: &mut BottomlessCave) {
     loop {
         if !cave.drop_sand(SAND_SPAWN_POINT) {
             break;
@@ -24,7 +25,7 @@ fn drop_until_max(cave: &mut Cave) {
 
 fn part_one() {
     let input = day_util::read_input();
-    let mut cave = input_to_cave(&input);
+    let mut cave = input_to_bottomless_cave(&input);
 
     drop_until_max(&mut cave);
     let sand_count = cave.sand_count();
@@ -49,7 +50,7 @@ mod tests {
         assert_eq!(rock_shapes[0], known_rock_shapes[0]);
         assert_eq!(rock_shapes[1], known_rock_shapes[1]);
 
-        let cave = input_to_cave(TEST_INPUT);
+        let cave = input_to_bottomless_cave(TEST_INPUT);
 
         assert_eq!(cave.left_bound(), 494);
         assert_eq!(cave.right_bound(), 503);
@@ -60,9 +61,9 @@ mod tests {
 
     #[test]
     fn part_one_test() {
-        let mut cave = input_to_cave(TEST_INPUT);
+        let mut cave = input_to_bottomless_cave(TEST_INPUT);
 
         drop_until_max(&mut cave);
-        assert_eq!(cave.sand_count(), 23);
+        assert_eq!(cave.sand_count(), 24);
     }
 }

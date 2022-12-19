@@ -1,6 +1,6 @@
-use cave::*;
-
 pub mod cave;
+pub mod bottomless_cave;
+pub mod infinite_cave;
 
 use std::{str::FromStr, collections::HashSet};
 
