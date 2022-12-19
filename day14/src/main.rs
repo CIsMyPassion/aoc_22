@@ -1,4 +1,5 @@
 use crate::puzzle::*;
+use crate::puzzle::cave::*;
 
 mod puzzle;
 
@@ -62,6 +63,6 @@ mod tests {
         let mut cave = input_to_cave(TEST_INPUT);
 
         drop_until_max(&mut cave);
-        assert_eq!(cave.sand_count(), 24);
+        assert_eq!(cave.sand_count(), 23);
     }
 }
