@@ -1,6 +1,9 @@
+use std::cell::RefCell;
+use std::rc::Rc;
 use crate::puzzle::*;
 use crate::puzzle::cave::Cave;
 use crate::puzzle::bottomless_cave::BottomlessCave;
+use crate::puzzle::infinite_cave::InfiniteCave;
 
 mod puzzle;
 
@@ -8,6 +11,7 @@ const SAND_SPAWN_POINT: Position = Position(500, 0);
 
 fn main() {
     part_one();
+    part_two();
 }
 
 fn input_to_bottomless_cave(input: &str) -> BottomlessCave {
@@ -15,9 +19,15 @@ fn input_to_bottomless_cave(input: &str) -> BottomlessCave {
     BottomlessCave::new(rock_shape)
 }
 
-fn drop_until_max(cave: &mut BottomlessCave) {
+fn input_to_infinite_cave(input: &str) -> InfiniteCave {
+    let rock_shape: Vec<RockShape> = input.split("\n").filter(|line| !line.is_empty()).map(|line| line.parse().unwrap()).collect();
+    InfiniteCave::new(rock_shape)
+}
+
+fn drop_until_full(cave: Rc<RefCell<dyn Cave>>) {
     loop {
-        if !cave.drop_sand(SAND_SPAWN_POINT) {
+        let drop_sand_value = cave.borrow_mut().drop_sand(SAND_SPAWN_POINT);
+        if !drop_sand_value {
             break;
         }
     }
@@ -25,16 +35,26 @@ fn drop_until_max(cave: &mut BottomlessCave) {
 
 fn part_one() {
     let input = day_util::read_input();
-    let mut cave = input_to_bottomless_cave(&input);
+    let cave = Rc::new(RefCell::new(input_to_bottomless_cave(&input)));
 
-    drop_until_max(&mut cave);
-    let sand_count = cave.sand_count();
+    drop_until_full(cave.clone());
+    let sand_count = cave.borrow().sand_count();
+    println!("Sand count: {sand_count}");
+}
+
+fn part_two() {
+    let input = day_util::read_input();
+    let cave = Rc::new(RefCell::new(input_to_infinite_cave(&input)));
+
+    drop_until_full(cave.clone());
+    let sand_count = cave.borrow().sand_count();
     println!("Sand count: {sand_count}");
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use super::cave::Cave;
 
     const TEST_INPUT: &str = r"498,4 -> 498,6 -> 496,6
 503,4 -> 502,4 -> 502,9 -> 494,9
@@ -50,20 +70,33 @@ mod tests {
         assert_eq!(rock_shapes[0], known_rock_shapes[0]);
         assert_eq!(rock_shapes[1], known_rock_shapes[1]);
 
-        let cave = input_to_bottomless_cave(TEST_INPUT);
+        let bottomless_cave = input_to_bottomless_cave(TEST_INPUT);
 
-        assert_eq!(cave.left_bound(), 494);
-        assert_eq!(cave.right_bound(), 503);
-        assert_eq!(cave.lower_bound(), 9);
-        assert_eq!(cave.sand_count(), 0);
-        assert_eq!(cave.rock_count(), 20);
+        assert_eq!(bottomless_cave.left_bound(), 494);
+        assert_eq!(bottomless_cave.right_bound(), 503);
+        assert_eq!(bottomless_cave.lower_bound(), 9);
+        assert_eq!(bottomless_cave.sand_count(), 0);
+        assert_eq!(bottomless_cave.rock_count(), 20);
+
+        let infinite_cave = input_to_infinite_cave(TEST_INPUT);
+
+        assert_eq!(infinite_cave.floor_level(), 11);
+        assert_eq!(infinite_cave.rock_count(), 20);
     }
 
     #[test]
     fn part_one_test() {
-        let mut cave = input_to_bottomless_cave(TEST_INPUT);
+        let cave = Rc::new(RefCell::new(input_to_bottomless_cave(TEST_INPUT)));
 
-        drop_until_max(&mut cave);
-        assert_eq!(cave.sand_count(), 24);
+        drop_until_full(cave.clone());
+        assert_eq!(cave.borrow().sand_count(), 24);
+    }
+
+    #[test]
+    fn part_two_test() {
+        let cave = Rc::new(RefCell::new(input_to_infinite_cave(TEST_INPUT)));
+
+        drop_until_full(cave.clone());
+        assert_eq!(cave.borrow().sand_count(), 93);
     }
 }

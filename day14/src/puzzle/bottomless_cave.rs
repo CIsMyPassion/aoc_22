@@ -34,6 +34,17 @@ impl Cave for BottomlessCave {
 
         sand_counter
     }
+
+    #[cfg(test)]
+    fn rock_count(&self) -> usize {
+        let mut rock_counter = 0;
+
+        self.area.iter().for_each(|line| {
+            rock_counter += line.iter().filter(|&element| *element == Filling::Rock).count();
+        });
+
+        rock_counter
+    }
 }
 
 impl BottomlessCave {
@@ -74,17 +85,6 @@ impl BottomlessCave {
     #[cfg(test)]
     pub fn lower_bound(&self) -> usize {
         self.lower_bound
-    }
-
-    #[cfg(test)]
-    pub fn rock_count(&self) -> usize {
-        let mut rock_counter = 0;
-
-        self.area.iter().for_each(|line| {
-            rock_counter += line.iter().filter(|&element| *element == Filling::Rock).count();
-        });
-
-        rock_counter
     }
 
     fn sand_step(&mut self, sand_position: &mut Position) -> bool {
