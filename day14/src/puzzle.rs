@@ -120,12 +120,16 @@ impl Cave {
     pub fn drop_sand(&mut self, drop_location: Position) -> bool {
         let mut sand_position = drop_location;
         loop {
-            if !self.sand_step(&mut sand_position) {
+            let step = self.sand_step(&mut sand_position);
+            let is_in_loop = self.is_in_bounds(&sand_position);
+
+            if !step || !is_in_loop {
                 break;
             }
         }
 
-        self.is_in_bounds(&sand_position)
+        let is_in = self.is_in_bounds(&sand_position);
+        is_in
     }
 
     pub fn sand_count(&self) -> usize {
@@ -165,10 +169,49 @@ impl Cave {
     }
 
     fn sand_step(&mut self, sand_position: &mut Position) -> bool {
-        false
+        if sand_position.1 >= self.lower_bound {
+            sand_position.1 += 1;
+            true
+        } else {
+            let below_middle = self.get_filling(&Position(sand_position.0, sand_position.1 + 1));
+            let below_left = self.get_filling(&Position(sand_position.0 - 1, sand_position.1 + 1));
+            let below_right = self.get_filling(&Position(sand_position.0 + 1, sand_position.1 + 1));
+
+            if below_middle == Filling::Air {
+                sand_position.1 += 1;
+                return true
+            } else if below_left == Filling::Air {
+                sand_position.1 += 1;
+                sand_position.0 -= 1;
+                return true
+            } else if below_right == Filling::Air {
+                sand_position.1 += 1;
+                sand_position.0 += 1;
+                return true
+            } else {
+                self.set_filling(&sand_position, Filling::Sand);
+                false
+            }
+        }
+    }
+
+    fn get_filling(&self, position: &Position) -> Filling {
+        if self.is_in_bounds(position) {
+            self.area[position.0 - self.left_bound][position.1]
+        } else {
+            Filling::Air
+        }
+    }
+
+    fn set_filling(&mut self, position: &Position, filling: Filling) {
+        self.area[position.0 - self.left_bound][position.1] = filling;
     }
 
     fn is_in_bounds(&self, sand_position: &Position) -> bool {
-        false
+        if sand_position.0 > self.right_bound || sand_position.0 < self.left_bound {
+            false
+        } else {
+            sand_position.1 <= self.lower_bound
+        }
     }
 }
