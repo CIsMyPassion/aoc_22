@@ -1,4 +1,4 @@
-use std::{collections::{HashMap, HashSet}, str::FromStr};
+use std::{collections::{HashMap, BTreeSet}, str::FromStr};
 
 pub struct Valve {
     flow_rate: u64,
@@ -60,14 +60,29 @@ impl FromStr for TunnelSystem {
     }
 }
 
-pub fn solve(tunnel_system: &TunnelSystem, start_time: u64, start_pos: String) -> u64 {
-    solve_recursive(tunnel_system, start_pos, start_time, HashSet::new(), HashMap::new())
+#[derive(Debug, Hash, PartialEq, Eq)]
+struct SolveState {
+    current_pos: String,
+    remaining_time: u64,
+    open_set: BTreeSet<String>,
 }
 
-fn solve_recursive(tunnel_system: &TunnelSystem, pos: String, time: u64, open_set: HashSet<String>, state_cache: HashMap<(String, u64, HashSet<String>), u64>) -> u64 {
+impl SolveState {
+    pub fn new(current_pos: String, remaining_time: u64, open_set: BTreeSet<String>) -> Self {
+        Self { current_pos, remaining_time, open_set }
+    }
+}
+
+pub fn solve(tunnel_system: &TunnelSystem, start_time: u64, start_pos: String) -> u64 {
+    solve_recursive(tunnel_system, start_pos, start_time, BTreeSet::new(), &mut HashMap::new())
+}
+
+fn solve_recursive(tunnel_system: &TunnelSystem, pos: String, time: u64, open_set: BTreeSet<String>, state_cache: &mut HashMap<SolveState, u64>) -> u64 {
     
-    if let value = state_cache.get((pos, time, open_set)) {
-        return value;
+    let current_solve_state = SolveState::new(pos.clone(), time, open_set.clone());
+    
+    if let Some(value) = state_cache.get(&current_solve_state) {
+        return *value;
     }
 
     if time > 1 {
@@ -77,19 +92,23 @@ fn solve_recursive(tunnel_system: &TunnelSystem, pos: String, time: u64, open_se
         if !open_set.contains(&pos) && current_valve.flow_rate > 0 {
             let mut open_set_step = open_set.clone();
             open_set_step.insert(pos.clone());
-            paths.push(current_valve.flow_rate * (time - 1) + solve_recursive(tunnel_system, pos.clone(), time - 1, open_set_step));            
+            paths.push(current_valve.flow_rate * (time - 1) + solve_recursive(tunnel_system, pos.clone(), time - 1, open_set_step, state_cache));            
         }
         
         for connection in &current_valve.connections {
-            paths.push(solve_recursive(tunnel_system, connection.clone(), time - 1, open_set.clone()));
+            paths.push(solve_recursive(tunnel_system, connection.clone(), time - 1, open_set.clone(), state_cache));
         }
         
         paths.sort();
         paths.reverse();
+        
+        state_cache.insert(current_solve_state, paths[0]);
 
         paths[0]
 
     } else {
+        state_cache.insert(current_solve_state, 0);
+
         0
     }
 }
