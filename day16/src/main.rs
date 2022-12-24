@@ -8,16 +8,10 @@ fn main() {
 
 fn part_one() {
     let input = day_util::read_input_safe("day16");
-    let mut tunnel_system: TunnelSystem = input.parse().unwrap();    
-    let pressure = release_most_pressure(&mut tunnel_system);
+    let tunnel_system: TunnelSystem = input.parse().unwrap();    
+    let pressure = solve(&tunnel_system, 30, "AA".to_owned());
 
     println!("Pressure released: {pressure}");
-}
-
-fn release_most_pressure(tunnel_system: &mut TunnelSystem) -> u64 {
-
-
-    0
 }
 
 #[cfg(test)]
@@ -48,8 +42,8 @@ Valve JJ has flow rate=21; tunnel leads to valve II
     
     #[test]
     fn part_one_test() {
-        let mut tunnel_system: TunnelSystem = TEST_INPUT.parse().unwrap();    
-        let pressure = release_most_pressure(&mut tunnel_system);
+        let tunnel_system: TunnelSystem = TEST_INPUT.parse().unwrap();    
+        let pressure = solve(&tunnel_system, 30, "AA".to_owned());
 
         assert_eq!(pressure, 1651);
     }

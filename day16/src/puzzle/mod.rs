@@ -1,4 +1,4 @@
-use std::{collections::HashMap, str::FromStr};
+use std::{collections::{HashMap, HashSet}, str::FromStr};
 
 pub struct Valve {
     flow_rate: u64,
@@ -10,10 +10,12 @@ impl Valve {
         Self { flow_rate, connections }
     }
     
+    #[cfg(test)]
     pub fn flow_rate(&self) -> u64 {
         self.flow_rate
     }
     
+    #[cfg(test)]
     pub fn connections(&self) -> Vec<String> {
         self.connections.clone()
     }
@@ -21,49 +23,18 @@ impl Valve {
 
 pub struct TunnelSystem {
     valves: HashMap<String, Valve>,
-    active_valves: HashMap<String, u64>,
-    current_valve: String,
-    time_left: u64,
 }
 
 impl TunnelSystem {
+    pub fn valve(&self, key: &str) -> Option<&Valve> {
+        self.valves.get(key)
+    }
+
+    #[cfg(test)]
     pub fn valve_list(&self) -> Vec<&String> {
         self.valves.keys().collect()
     }
     
-    pub fn valve(&self, key: &str) -> Option<&Valve> {
-        self.valves.get(key)
-    }
-    
-    pub fn is_active(&self, key: &str) -> bool {
-        self.active_valves.contains_key(key)
-    }
-    
-    pub fn move_to_valve(&mut self, key: &str) -> bool {
-        let current_valve = self.valves.get(&self.current_valve).unwrap();
-        if current_valve.connections.contains(&key.to_owned()) {
-            self.time_left -= 1;
-            self.current_valve = key.to_owned();
-            true
-        } else {
-            false
-        }
-    }
-    
-    pub fn activate_valve(&mut self) -> bool {
-        if !self.active_valves.contains_key(&self.current_valve) {
-            let current_valve = self.valves.get(&self.current_valve).unwrap();
-            self.time_left -= 1;
-            self.active_valves.insert(self.current_valve.clone(), current_valve.flow_rate * self.time_left);
-            true
-        } else {
-            false
-        }
-    }
-    
-    pub fn total_pressure(&self) -> u64 {
-        self.active_valves.iter().map(|(_, value)| value).sum()
-    }
 }
 
 impl FromStr for TunnelSystem {
@@ -85,6 +56,40 @@ impl FromStr for TunnelSystem {
             valves.insert(valve_name.to_owned(), valve);
         }
         
-        Ok(TunnelSystem { valves, active_valves: HashMap::new(), current_valve: "AA".to_owned(), time_left: 30 })
+        Ok(TunnelSystem { valves })
+    }
+}
+
+pub fn solve(tunnel_system: &TunnelSystem, start_time: u64, start_pos: String) -> u64 {
+    solve_recursive(tunnel_system, start_pos, start_time, HashSet::new(), HashMap::new())
+}
+
+fn solve_recursive(tunnel_system: &TunnelSystem, pos: String, time: u64, open_set: HashSet<String>, state_cache: HashMap<(String, u64, HashSet<String>), u64>) -> u64 {
+    
+    if let value = state_cache.get((pos, time, open_set)) {
+        return value;
+    }
+
+    if time > 1 {
+        let current_valve = tunnel_system.valve(&pos).unwrap();
+        let mut paths = Vec::new();
+
+        if !open_set.contains(&pos) && current_valve.flow_rate > 0 {
+            let mut open_set_step = open_set.clone();
+            open_set_step.insert(pos.clone());
+            paths.push(current_valve.flow_rate * (time - 1) + solve_recursive(tunnel_system, pos.clone(), time - 1, open_set_step));            
+        }
+        
+        for connection in &current_valve.connections {
+            paths.push(solve_recursive(tunnel_system, connection.clone(), time - 1, open_set.clone()));
+        }
+        
+        paths.sort();
+        paths.reverse();
+
+        paths[0]
+
+    } else {
+        0
     }
 }
