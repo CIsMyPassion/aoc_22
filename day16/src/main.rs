@@ -4,12 +4,21 @@ use puzzle::*;
 
 fn main() {
     part_one();
+    part_two();
 }
 
 fn part_one() {
     let input = day_util::read_input_safe("day16");
     let tunnel_system: TunnelSystem = input.parse().unwrap();    
     let pressure = solve(&tunnel_system, 30, "AA".to_owned());
+
+    println!("Pressure released: {pressure}");
+}
+
+fn part_two() {
+    let input = day_util::read_input_safe("day16");
+    let tunnel_system: TunnelSystem = input.parse().unwrap();    
+    let pressure = solve_with_elephant(&tunnel_system, 26, "AA".to_owned());
 
     println!("Pressure released: {pressure}");
 }
@@ -46,5 +55,13 @@ Valve JJ has flow rate=21; tunnel leads to valve II
         let pressure = solve(&tunnel_system, 30, "AA".to_owned());
 
         assert_eq!(pressure, 1651);
+    }
+
+    #[test]
+    fn part_two_test() {
+        let tunnel_system: TunnelSystem = TEST_INPUT.parse().unwrap();    
+        let pressure = solve_with_elephant(&tunnel_system, 26, "AA".to_owned());
+
+        assert_eq!(pressure, 1707);
     }
 }

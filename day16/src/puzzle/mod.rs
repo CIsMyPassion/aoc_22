@@ -63,40 +63,53 @@ impl FromStr for TunnelSystem {
 #[derive(Debug, Hash, PartialEq, Eq)]
 struct SolveState {
     current_pos: String,
+    last: bool,
     remaining_time: u64,
     open_set: BTreeSet<String>,
 }
 
 impl SolveState {
-    pub fn new(current_pos: String, remaining_time: u64, open_set: BTreeSet<String>) -> Self {
-        Self { current_pos, remaining_time, open_set }
+    pub fn new(current_pos: String, last: bool, remaining_time: u64, open_set: BTreeSet<String>) -> Self {
+        Self { current_pos, last, remaining_time, open_set }
     }
 }
 
 pub fn solve(tunnel_system: &TunnelSystem, start_time: u64, start_pos: String) -> u64 {
-    solve_recursive(tunnel_system, start_pos, start_time, BTreeSet::new(), &mut HashMap::new())
+    solve_recursive(tunnel_system, start_pos.clone(), start_time, BTreeSet::new(), &mut HashMap::new(), true, start_pos, start_time)
 }
 
-fn solve_recursive(tunnel_system: &TunnelSystem, pos: String, time: u64, open_set: BTreeSet<String>, state_cache: &mut HashMap<SolveState, u64>) -> u64 {
-    
-    let current_solve_state = SolveState::new(pos.clone(), time, open_set.clone());
-    
-    if let Some(value) = state_cache.get(&current_solve_state) {
-        return *value;
-    }
+pub fn solve_with_elephant(tunnel_system: &TunnelSystem, start_time: u64, start_pos: String) -> u64 {
+    solve_recursive(tunnel_system, start_pos.clone(), start_time, BTreeSet::new(), &mut HashMap::new(), false, start_pos, start_time)
+}
 
-    if time > 1 {
+fn solve_recursive(tunnel_system: &TunnelSystem, pos: String, time: u64, open_set: BTreeSet<String>, state_cache: &mut HashMap<SolveState, u64>, last: bool, start_pos: String, start_time: u64) -> u64 {
+    
+    if time == 0 {
+        if !last {
+            let open_set_step = open_set.clone();
+            let value = solve_recursive(tunnel_system, start_pos.clone(), start_time, open_set_step, state_cache, true, start_pos.clone(), start_time);
+            value
+        } else {
+            0
+        }
+    } else {
+        let current_solve_state = SolveState::new(pos.clone(), last, time, open_set.clone());
+    
+        if let Some(value) = state_cache.get(&current_solve_state) {
+            return *value;
+        }
+
         let current_valve = tunnel_system.valve(&pos).unwrap();
         let mut paths = Vec::new();
 
         if !open_set.contains(&pos) && current_valve.flow_rate > 0 {
             let mut open_set_step = open_set.clone();
             open_set_step.insert(pos.clone());
-            paths.push(current_valve.flow_rate * (time - 1) + solve_recursive(tunnel_system, pos.clone(), time - 1, open_set_step, state_cache));            
+            paths.push(current_valve.flow_rate * (time - 1) + solve_recursive(tunnel_system, pos.clone(), time - 1, open_set_step, state_cache, last, start_pos.clone(), start_time));            
         }
         
         for connection in &current_valve.connections {
-            paths.push(solve_recursive(tunnel_system, connection.clone(), time - 1, open_set.clone(), state_cache));
+            paths.push(solve_recursive(tunnel_system, connection.clone(), time - 1, open_set.clone(), state_cache, last, start_pos.clone(), start_time));
         }
         
         paths.sort();
@@ -105,10 +118,5 @@ fn solve_recursive(tunnel_system: &TunnelSystem, pos: String, time: u64, open_se
         state_cache.insert(current_solve_state, paths[0]);
 
         paths[0]
-
-    } else {
-        state_cache.insert(current_solve_state, 0);
-
-        0
     }
 }
