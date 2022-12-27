@@ -1,4 +1,4 @@
-use std::{collections::HashSet, ops::Add};
+use std::{collections::HashSet, ops::{Add, Sub}};
 
 #[derive(Copy, Clone)]
 pub enum PushDirection {
@@ -98,8 +98,19 @@ impl Add for Position {
     }
 }
 
-#[derive(Clone, Copy)]
-enum Filling {
+impl Sub for Position {
+    type Output = Self;
+    
+    fn sub(self, rhs: Self) -> Self::Output {
+        Self {
+            row: self.row - rhs.row,
+            column: self.column - rhs.column,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Filling {
     Rock,
     Air,
 }
@@ -132,28 +143,28 @@ impl Chamber {
                 PushDirection::Left => {
                     if rock_position.column > 0 {
                         rock_position.column -= 1;
+
+                        if self.collides(&rock_position, &rock_shape) {
+                            rock_position.column += 1;
+                        }
                     }
                     
-                    if self.collides(&rock_position, &rock_shape) {
-                        rock_position.column += 1;
-                    }
                 },
                 PushDirection::Right => {
                     if rock_position.column + width < self.width - 1 {
                         rock_position.column += 1;
-                    }
                     
-                    if self.collides(&rock_position, &rock_shape) {
-                        rock_position.column -= 1;
+                        if self.collides(&rock_position, &rock_shape) {
+                            rock_position.column -= 1;
+                        }
                     }
                 },
             };
             
             if rock_position.row > 0 {
                 rock_position.row -= 1;
-                if !self.collides(&rock_position, &rock_shape) {
-
-                } else {
+                if self.collides(&rock_position, &rock_shape) {
+                    rock_position.row += 1;
                     self.set_rock(&rock_position, &rock_shape);
                     break;
                 }
@@ -166,17 +177,26 @@ impl Chamber {
     }
 
     fn collides(&self, position: &Position, shape: &HashSet<Position>) -> bool {
-        if position.row >= self.filled_space.len() as u64 {
+        if position.row < self.filled_space.len() as u64 {
+            for piece in shape {
+                let total_position = *position + *piece;
+                if total_position.row < self.filled_space.len() as u64 {
+                    match self.filled_space[total_position.row as usize][total_position.column as usize] {
+                        Filling::Air => (),
+                        Filling::Rock => return true,
+                    }
+                }
+            }
             false
         } else {
-            true
+            false
         }
     }
 
     fn set_rock(&mut self, position: &Position, shape: &HashSet<Position>) {
         let height = shape.iter().map(|pos| pos.row).max().unwrap();
         let total_height = position.row + height;
-        for _ in self.filled_space.len() as u64..total_height {
+        for _ in self.filled_space.len() as u64..total_height + 1 {
             self.filled_space.push(vec![Filling::Air; self.width as usize]);
         }
         
@@ -184,8 +204,6 @@ impl Chamber {
             let total_position = *pos + *position;
             self.filled_space[total_position.row as usize][total_position.column as usize] = Filling::Rock;
         });
-
-        todo!("set rock into chamber")
     }
 
     fn current_push_direction(&self) -> PushDirection {
@@ -199,5 +217,10 @@ impl Chamber {
     
     pub fn highest_rock(&self) -> u64 {
         self.filled_space.len() as u64
+    }
+    
+    #[cfg(test)]
+    pub fn filled_line(&self, index: usize) -> Vec<Filling> {
+        self.filled_space[index].clone()
     }
 }

@@ -26,7 +26,7 @@ mod tests {
 "#;
 
     #[test]
-    fn part_one_test() {
+    fn fine_test() {
         let push_list = PushDirection::parse_to_vec(TEST_INPUT);
         let mut chamber = Chamber::new(7, push_list);
         
@@ -34,6 +34,18 @@ mod tests {
             chamber.drop_rock();
         }
         
-        assert_eq!(chamber.highest_rock(), 17);
+        assert_eq!(chamber.highest_rock(), 18);
+    }
+
+    #[test]
+    fn part_one_test() {
+        let push_list = PushDirection::parse_to_vec(TEST_INPUT);
+        let mut chamber = Chamber::new(7, push_list);
+        
+        while chamber.dropped_rocks() < 2022 {
+            chamber.drop_rock();
+        }
+        
+        assert_eq!(chamber.highest_rock(), 3068);
     }
 }

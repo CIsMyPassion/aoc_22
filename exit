@@ -1,0 +1,287 @@
+[33mcommit 026d5c536695389b5bbff5319de658bff1c91d5a[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Sun Dec 25 01:21:52 2022 +0100
+
+    Started on day 17 part one
+
+[33mcommit 2f6df076c1cf1bec50226062944b2c15d9fd815d[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Sat Dec 24 23:57:45 2022 +0100
+
+    Finished day 16 part two
+
+[33mcommit b3044eeefedfa6f1ebcb0ed6f26b84afee1412c7[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Sat Dec 24 23:05:48 2022 +0100
+
+    Finished day 16 part one
+
+[33mcommit 3897cb7dc42ef2b07f2ca1e1aaa7a5062ecc9efd[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Sat Dec 24 15:05:50 2022 +0100
+
+    Probably good start for solution for day 16
+
+[33mcommit 2eb003dc1011529629310ade99b065de94ca2eac[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Fri Dec 23 22:11:23 2022 +0100
+
+    Probably stupid start for day 16
+
+[33mcommit bba17b8e99293f83e5c5c52161dd4e638bcf3438[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Fri Dec 23 20:44:59 2022 +0100
+
+    Finished day 15 part two
+
+[33mcommit 6e221bca70ba4192148ddf736234db06840a4a85[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Mon Dec 19 21:16:22 2022 +0100
+
+    Minor improvement to day_util library
+
+[33mcommit 0b21718d6c6c0ca31689e86061a9404a634c102b[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Mon Dec 19 21:08:24 2022 +0100
+
+    Finished day 15 part one
+
+[33mcommit 3ed4b867ec329698b503aa0e3f433f316acd7804[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Mon Dec 19 20:07:31 2022 +0100
+
+    Finished day 14 part one
+
+[33mcommit 0547756713b462fe731dbf2efdfa2e1df1b21f04[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Mon Dec 19 15:59:34 2022 +0100
+
+    Refactored cave into a trait
+
+[33mcommit c8b289ddd18a22bd17fade09dfa938c60ec32222[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Mon Dec 19 15:47:43 2022 +0100
+
+    Refactoring
+
+[33mcommit 7d861eddfd73d76a464bef86ed5cfcf06bfe0ba8[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Mon Dec 19 14:40:56 2022 +0100
+
+    Finished day 14 part one
+
+[33mcommit 5079557198045fc59188d30d93c0b8ed58ffc19b[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Mon Dec 19 12:35:27 2022 +0100
+
+    Parser for day 14 part one is working
+
+[33mcommit 89a713febaab1facc52d27d2daf349788a1f2e4e[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Sun Dec 18 14:48:40 2022 +0100
+
+    Highly non functional code for day 14 part one. But hey it looks kinda funny
+
+[33mcommit b7597c2977cc95d12fe0e66e8c3c7b8387ed86f7[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Fri Dec 16 16:44:42 2022 +0100
+
+    Work on day 14 part one
+
+[33mcommit e6c0d78caf322b70154e6f2aa916f3699b1b5467[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Fri Dec 16 16:20:27 2022 +0100
+
+    Restruturing the project and started day 14
+
+[33mcommit c386c9dbb3cda4af3950b79a62de9f7fb66c719f[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Fri Dec 16 15:48:35 2022 +0100
+
+    Finished day 13 part two
+
+[33mcommit 808658356d32bcdb3a27f7622b08d43478aa1fae[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Fri Dec 16 15:17:06 2022 +0100
+
+    Finished day 13 part one
+
+[33mcommit 5ff682d802a8bdae578f56fa6319835e2df69fcf[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Thu Dec 15 20:41:08 2022 +0100
+
+    Further work on day 13 part one
+
+[33mcommit 2e9ed32630099441ffc6a9b0703a4d8902b21285[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Tue Dec 13 22:02:58 2022 +0100
+
+    Started day 13 part one
+
+[33mcommit 09ae59122499cb3c58df690cbdf5b459a92630b6[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Tue Dec 13 20:17:25 2022 +0100
+
+    Finished day 12 part two
+
+[33mcommit 96292db8050be84a908555b2a38408c96076cfa6[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Tue Dec 13 19:57:37 2022 +0100
+
+    Finished day 12 part one
+
+[33mcommit 0516bead16d8eafebe20c60ad3af474d9a42fe79[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Tue Dec 13 17:24:05 2022 +0100
+
+    Finished day 11 part two
+
+[33mcommit 5152c919bf96ae8cb0552b66a6598f807d9c3fa9[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Tue Dec 13 17:08:00 2022 +0100
+
+    Finished day 11 part one
+
+[33mcommit d42fa163a955a647964b1c52e857b039106f0022[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Tue Dec 13 12:41:05 2022 +0100
+
+    Finished day 10 part two
+
+[33mcommit ba3ff4ba6a8591cc354bcdc03e6f995e936742c8[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Tue Dec 13 11:34:13 2022 +0100
+
+    Removed debug message
+
+[33mcommit 5c26a8bbb211ff432028f71875379d4168c9c9aa[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Tue Dec 13 11:33:44 2022 +0100
+
+    Refactored day 10 part one
+
+[33mcommit 72da90075942bbe5178b26528ab942a4016fd143[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Mon Dec 12 18:32:49 2022 +0100
+
+    Finished day 10 part one
+
+[33mcommit d9b7fd6ed5f5afbee265209f5b0f1d2e56a9c8ce[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Mon Dec 12 17:02:53 2022 +0100
+
+    Finished day 9 part two
+
+[33mcommit 818c317a19410238e4b36dfea802f56dd2a7eee0[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Mon Dec 12 16:27:58 2022 +0100
+
+    Finished day 9 part one
+
+[33mcommit 20d9b9e595cae7b98eea3dc43f99f6d4c04c3763[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Mon Dec 12 15:33:28 2022 +0100
+
+    Finished day 8 part two
+
+[33mcommit eab186dbd9853f13f350188f2be0038ff8619ca5[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Mon Dec 12 15:07:51 2022 +0100
+
+    Finished day 8 part one
+
+[33mcommit 8f30e149fb1eab4b09dbd728f1aacb6fc85f6d6d[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Sun Dec 11 23:26:49 2022 +0100
+
+    Started day 8 part one
+
+[33mcommit 47e6ed0b6583e7a27b15a2f9dcadb832fe1af78f[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Sun Dec 11 22:14:45 2022 +0100
+
+    Finished day 07 part two
+
+[33mcommit 11119c0a72c5e5920a104867fc081785f60d8dba[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Sun Dec 11 21:55:11 2022 +0100
+
+    Finished day 07 part one
+
+[33mcommit 03dd7511a548456fc72817f16279f0230a06e11b[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Sat Dec 10 17:15:26 2022 +0100
+
+    Completed part two of day 6
+
+[33mcommit 660e33504df73709ebabe371e9f83a0ec79f579d[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Sat Dec 10 17:10:49 2022 +0100
+
+    Finished part one of day 6
+
+[33mcommit 08e4a325cd872830ccc5776c7e9cb727762d3c3a[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Sat Dec 10 16:52:20 2022 +0100
+
+    Finished part two
+
+[33mcommit 10e27c115c62112b96a05d5aeff229e2e5e9a139[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Sat Dec 10 16:35:53 2022 +0100
+
+    Completed part one
+
+[33mcommit 44bcf84585450fd225c44117e955e246fe8c4699[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Mon Dec 5 22:13:04 2022 +0100
+
+    Started part one
+
+[33mcommit 3f0303700c377fedca9f1b3df2f10248a3388b50[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Sun Dec 4 12:55:20 2022 +0100
+
+    Finished day04
+
+[33mcommit 2b1b5ca79edd897d88f5fe4995a24a9f3c964210[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Sun Dec 4 12:48:40 2022 +0100
+
+    Finished part one
+
+[33mcommit 20b4566abdbedc7db402ff55237d6bdfdfd325ed[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Sat Dec 3 15:39:20 2022 +0100
+
+    Finished day03
+
+[33mcommit 839e177a97a055aa91dbf16b91977d1d06b7e6c6[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Sat Dec 3 14:46:34 2022 +0100
+
+    Finished part one
+
+[33mcommit 758b1d1747e3583884e30cf5c98dab72a6e00e46[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Sat Dec 3 12:17:32 2022 +0100
+
+    Added day03
+
+[33mcommit 908a326c8d2f8a22184503a70edbc1131cda450e[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Fri Dec 2 21:45:48 2022 +0100
+
+    Solved day02
+
+[33mcommit f7338b5ac94ede7e65b970ec703a7a2c172b6062[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Fri Dec 2 19:09:39 2022 +0100
+
+    Finished day01
+
+[33mcommit b8bdb386f6076407ec98849ac03fa5227546e5da[m
+Author: Sebastian Nocke <sjno@gmx.de>
+Date:   Fri Dec 2 18:05:53 2022 +0100
+
+    day01 setup
